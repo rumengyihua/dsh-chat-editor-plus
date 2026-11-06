@@ -7,6 +7,14 @@ DeepSeek Harness 消息编辑器：改写 / 删除 / 折叠任意一条消息，
 > An edited fork of `dsh-chat-editor` from DSH-CyberWorkStation, adapted for the
 > DeepSeek Harness desktop client 0.2.1-rc.2. Same features, same MIT license.
 
+**适配范围**：实测可用 **DSH 桌面端 0.2.1-rc.2**；`package.json` 的 `engines.dsh` 声明为
+**`>=0.2.1-rc.2 <0.3.0`**（覆盖 0.2.x 全部正式版与预发布版，不含 0.2.1-rc.2 之前与 0.3.0 及以后；
+0.2.2 及以上尚未实测）。安装与启动时由插件管理器校验，不满足会拒绝加载，详见[适配范围](#适配范围)。
+
+**Supported range**: verified against DSH desktop **0.2.1-rc.2**; `engines.dsh` is
+**`>=0.2.1-rc.2 <0.3.0`** (all 0.2.x releases and prereleases). Checked by the plugin
+manager before install and at startup; see [adapter range](#适配范围).
+
 ## 功能
 
 - 会话头部 ✎ 按钮打开消息面板：列出整段会话（用户、助手、注入上下文、工具结果、压缩摘要）；
