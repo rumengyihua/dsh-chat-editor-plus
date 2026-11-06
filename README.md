@@ -59,13 +59,29 @@ D:\dsh\resources\runtime\cli\bin\dsh.cmd plugin --profile desktop add file:D:\wo
 `~/.dsh/profiles/desktop/package.json` 的 `dsh.profile.bundles`（因为本包声明了 `dsh.bundle.patch`）。
 装好后重启桌面端，会话头部就会出现 ✎。
 
+## 适配范围
+
+- **DSH 运行时：`>=0.2.1-rc.2 <0.3.0`**（声明在 `package.json` 的 `engines.dsh`）。
+  桌面端在导入插件前会拿它和运行时版本做兼容性检查：不满足时安装/启动会被拒绝，
+  可用 `dsh plugin allow-version <package@version> --dsh-version <runtime> --accept-risk` 逐版本豁免。
+  该范围覆盖 0.2.x 的全部正式版与预发布版，不包含 0.2.1-rc.2 之前的版本和 0.3.0 及以后。
+- **实测环境**：DSH 桌面端 **0.2.1-rc.2**（Windows x64），profile `desktop`；0.2.2 及以上未验证。
+- **依赖的核心契约（按 0.2.1-rc.2 逐个核对）**：`SessionStore.registerMessageProjection`、
+  `appendPluginRecord`、`Session.surface` / `deriveMessages` / `snapshotEvents` / `eventAt` /
+  `flush`、`webServer.register({kind:'prefix'})`、`ctx.agents.get/create/resume`、
+  `agent.runMaintenance` / `send` / `status`、`agentPresets.resolve/mount`、
+  `workspaceRegistry.list/attachSession`、`tokenMeter.estimateMessage`、
+  `toolPairingBalancedBefore/After`、`llm.createUserMessage`。
+  其中投影契约（`project(event, {events, baseSeq, messages, nodes})` 的形状、投影被移除时的 fail-closed 行为）
+  一旦变化，本插件需要同步适配。
+- **依赖包**：`@deepseek-ai/dsh-home-paths`（必需，进程启动时读取）、`@deepseek-ai/dsh-session`
+  （改写/删除必需，运行时加载）；`@deepseek-ai/dsh-llm`、`@deepseek-ai/dsh-compaction` 为可选
+  （只影响 fork 的首条消息与 token 估算，缺失时相应功能返回 503）。
+
 ## 要求
 
-- DSH 桌面端 **0.2.1-rc.2**（已按该版本核对 `session.append` 的 `surfaceOp`/`sourceEventSeqs` 契约、
-  `compaction/prune` 计价、`toolPairingBalancedBefore/After`、`agentPresets`、`workspaceRegistry`、
-  `webServer.register({kind:'prefix'})`，以及 `registerMessageProjection` / `appendPluginRecord`）。
-- Node 侧依赖核心自带的 `@deepseek-ai/dsh-home-paths`、`@deepseek-ai/dsh-session`；
-  `dsh-compaction` / `dsh-llm` 为可选 peer（只影响助手改写与 fork 首条消息）。
+见上一节 [适配范围](#适配范围)：运行时要求已写进 `engines.dsh`，安装与启动时由插件管理器校验；
+必需的核心包与可选 peer 也都在那一节列出。
 
 ## 已知限制
 
