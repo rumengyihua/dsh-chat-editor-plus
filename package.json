@@ -1,7 +1,7 @@
 {
   "name": "dsh-chat-editor-plus",
-  "version": "0.1.0",
-  "description": "Edit, delete or fold any message of a DeepSeek Harness conversation — the user's own and the assistant's — in three modes (display-only, model-context prune + surface replace, fork). Desktop-adapted fork of dsh-chat-editor from DSH-CyberWorkStation.",
+  "version": "0.2.1",
+  "description": "Edit, delete or fold any message of a DeepSeek Harness conversation — the user's own and the assistant's. User edits and deletions rewrite what the model sees through the core's message projection (no placeholder, no correction prefix); assistant edits use the compaction prune + surface replace path; plus display-only folds and fork. Desktop-adapted fork of dsh-chat-editor from DSH-CyberWorkStation.",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
@@ -29,8 +29,9 @@
   },
   "peerDependencies": {
     "@deepseek-ai/dsh-compaction": "*",
+    "@deepseek-ai/dsh-home-paths": "*",
     "@deepseek-ai/dsh-llm": "*",
-    "@deepseek-ai/dsh-home-paths": "*"
+    "@deepseek-ai/dsh-session": "*"
   },
   "peerDependenciesMeta": {
     "@deepseek-ai/dsh-compaction": {
