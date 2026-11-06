@@ -73,6 +73,10 @@ D:\dsh\resources\runtime\cli\bin\dsh.cmd plugin --profile desktop add file:D:\wo
   桌面端在导入插件前会拿它和运行时版本做兼容性检查：不满足时安装/启动会被拒绝，
   可用 `dsh plugin allow-version <package@version> --dsh-version <runtime> --accept-risk` 逐版本豁免。
   该范围覆盖 0.2.x 的全部正式版与预发布版，不包含 0.2.1-rc.2 之前的版本和 0.3.0 及以后。
+- **为什么不支持更早的版本**：0.1.5-rc.2 的核心只有一个**同名不同义**的 `session-projection`——那是面向客户端的
+  日志派生状态注册表（todo / goal / 统计等），**没有**消息投影需要的 `registerMessageProjection` 与
+  `appendPluginRecord`。缺这两个 API 时，上下文改写/删除只能退回 surface replace（助手消息无法以助手身份替换、
+  删除必须留一个占位节点），也就是本插件最早那版的行为。0.2.0 未验证。
 - **实测环境**：DSH 桌面端 **0.2.1-rc.2**（Windows x64），profile `desktop`；0.2.2 及以上未验证。
 - **依赖的核心契约（按 0.2.1-rc.2 逐个核对）**：`SessionStore.registerMessageProjection`、
   `appendPluginRecord`、`Session.surface` / `deriveMessages` / `snapshotEvents` / `eventAt` /
