@@ -1,0 +1,4 @@
+# dsh-chat-editor-plus bundle patch: one host row (the browser half rides the package's dsh.client entry).
+- insert:
+    - id: chat-editor-plus
+      name: dsh-chat-editor-plus

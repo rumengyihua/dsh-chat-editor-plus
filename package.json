@@ -1,0 +1,62 @@
+{
+  "name": "dsh-chat-editor-plus",
+  "version": "0.1.0",
+  "description": "Edit, delete or fold any message of a DeepSeek Harness conversation — the user's own and the assistant's — in three modes (display-only, model-context prune + surface replace, fork). Desktop-adapted fork of dsh-chat-editor from DSH-CyberWorkStation.",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-compaction": "*",
+    "@deepseek-ai/dsh-llm": "*",
+    "@deepseek-ai/dsh-home-paths": "*"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-compaction": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-llm": {
+      "optional": true
+    }
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rumengyihua/dsh-chat-editor-plus.git"
+  },
+  "homepage": "https://github.com/rumengyihua/dsh-chat-editor-plus#readme",
+  "bugs": {
+    "url": "https://github.com/rumengyihua/dsh-chat-editor-plus/issues"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "dsh-cyberworkstation",
+    "chat-editor"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
