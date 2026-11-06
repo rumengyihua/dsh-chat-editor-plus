@@ -20,11 +20,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-This project is a modified fork of dsh-chat-editor from
-https://github.com/WZZNNE/DSH-CyberWorkStation (MIT), adapted for the
-DeepSeek Harness desktop client (0.2.1-rc.2). The helpers in lib/kit/
-(session-read.js, fence.js) are part of dsh-cyberworkstation-kit from the
-same repository and carry the same license.
