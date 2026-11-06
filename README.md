@@ -11,15 +11,19 @@ DeepSeek Harness 消息编辑器：改写 / 删除 / 折叠任意一条消息，
 
 - 会话头部 ✎ 按钮打开消息面板：列出整段会话（用户、助手、注入上下文、工具结果、压缩摘要）；
 - 每条完成的助手消息旁边有内联 ✎，直接定位到那条；
+- **工具结果也可改**：面板里工具结果行的「改」走上下文投影，只替换内容块，`toolCallId` / `source` /
+  配对关系全部不动，模型会把改后的文本当成工具的原始返回；
 - 三种模式，按操作选择：
   - **显示（display）**：只改你看到的内容，日志与模型上下文不动（`$DSH_HOME/chat-edits.json`）；
-  - **上下文（context）**：改模型真正收到的东西。**用户消息的改写**和**任意删除**走核心的消息投影
-    （`registerMessageProjection` + `plugin:chat-editor-plus/rewrite` 记录，由 `appendPluginRecord` 写入）：
-    模型侧 `deriveMessages()` 看到的就是新文本，删除则整条消失——surface 节点、seq、messageId 全部保持不变，
-    没有占位符，也没有「用户更正了回复」之类的前缀。原文仍在日志里：改写可以再改成原文本撤销，
+  - **上下文（context）**：改模型真正收到的东西。**用户消息的改写、助手回复的改写、工具结果内容的改写、以及任意删除**
+    都走核心的消息投影（`registerMessageProjection` + `plugin:chat-editor-plus/rewrite` 记录，
+    由 `appendPluginRecord` 写入）：模型侧 `deriveMessages()` 看到的就是新文本，删除则整条消失——
+    surface 节点、seq、messageId 全部保持不变，没有占位符，也没有「用户更正了回复」之类的前缀。
+    改助手回复时，文本块**原位替换**，role / id / source 不变；**thinking 默认原样保留**，也可以在同一个编辑框里
+    一起改（编辑助手消息时会多出一个「思考」输入框）。改思考只替换 reasoning 块的 text，replay 签名保持不变——
+    实测 DeepSeek Messages 端不校验「签名 ↔ 思考文本」的一致性，核心的 replay 校验也只比较块数量与类型，
+    所以签名照发即可。原文仍在日志里：改写可以再改成原文本撤销，
     删除在面板里没有撤销按钮（模型那份已经没了，日志里仍然保留原文）。
-    **助手文本的改写**仍走核心的压缩路径：`compaction/prune`（影子计价）+ 带
-    `surfaceOp:{op:'replace'}` 与 `sourceEventSeqs` 的替换节点，在 `agent.runMaintenance` 里执行。
   - **分叉（fork）**：在该轮之前复制会话（`ctx.agents.create({ seed })` + 工作区挂接），可选把编辑文本作为分叉后的第一条消息。
 - 折叠只影响显示，点一下展开。
 
@@ -30,6 +34,10 @@ DeepSeek Harness 消息编辑器：改写 / 删除 / 折叠任意一条消息，
 | 客户端改用 **`useChat`** 读会话节点（保留旧字段回退） | 原版读 `useSession(s => s.chat.nodes)`，`SessionSnapshot` 从来没有 `chat` 字段——在 0.1.5 和 0.2.1 上这段都是死的，导致显示层的改/藏/折叠永远不生效 |
 | DOM 行锚点优先读 **`data-chat-node-key`** | 0.2.x 的推理分组行 `data-chat-flow-key` 是 JSON 编码的渲染 key，不再等于节点 key |
 | 删掉 `kind === 'tool'` 分支 | 0.2.x 的 chat node 没有 `tool` 这种 kind（工具结果在 `turn-process` / `assistant-step` 的 data 里） |
+| 助手改写改用**消息投影**：文本块原位替换，保留 thinking 与签名 | 原来只能落成带前缀的 user 更正节点，模型一眼看穿；投影按 seq 换 message，角色/id/来源不变 |
+| 思考（thinking）可在面板里改：只换 reasoning 文本，签名照旧 | 核心只校验块数量/类型，端点不校验签名与文本，所以改思考不需要重新生成 |
+| 思考（thinking）改完后，**折叠摘要与展开正文同步显示新文本** | 记录同时驱动模型请求和你的界面，两边不再各说各话；按原生紧凑行距呈现，字面 `\n` 归一成换行 |
+| 工具结果内容可改（只动 content 块，`toolCallId`/`source` 不变） | 核心自己的 surface 替换也规定 tool/result 只允许改 content，说明这是受支持的操作；投影路径不需要额外占位 |
 | 用户改写 / 删除改用**消息投影**（`lib/projection.js`） | surface replace 必须插入一个节点、且助手消息不能以助手身份被替换；投影不挪节点、可删除、可撤销 |
 | 删除助手消息时**级联删除**它发起的工具结果 | 请求里不能出现「调用过但没返回」的 call；单独删工具结果会被拒绝 |
 | `dsh-cyberworkstation-kit` 的两个文件 **vendored 进 `lib/kit/`** | 该包只存在于原仓库、未发布 npm，桌面端 profile 无法解析 |
@@ -61,13 +69,19 @@ D:\dsh\resources\runtime\cli\bin\dsh.cmd plugin --profile desktop add file:D:\wo
 
 ## 已知限制
 
-- **助手文本的改写不能以助手身份生效**：核心禁止 `assistant/message` 携带 `sourceEventSeqs`，且助手的
-  thinking 块会带签名回放，只换文本会自相矛盾。所以「改助手回复」在上下文模式下落成一条 user 角色的
-  更正节点（带明确前缀）。若只想改自己看到的内容，用显示模式。
+- **助手改写的 thinking 默认不动**：新正文替换文本块，那条消息原有的 thinking 块连同 replay 签名一起保留；
+  如果它内部还写着旧答案，请在同一个编辑框里把「思考」一起改掉。块数量与类型必须保持不变（核心 replay 校验
+  要求与记录的块一一对应），所以不能新增/删除 reasoning 块，只能改已有块的文本。
+- 旧版本写入的「助手更正节点」是真实 user 消息（带 `[The user corrected …]` 前缀），新代码不会追溯改写它；
+  重新编辑一次即可改为投影记录。
 - 上下文模式要求会话空闲（agent 未在生成），否则返回 409。
 - 子代理会话只读。
-- 卸载本插件后，含 rewrite 记录的会话在缺少投影定义时无法构建请求
-  （核心报 `session message projection "…" was removed or replaced`）——保留插件，或重启后重新加载。
+- 卸载本插件时，若桌面端仍在运行，**已经用过投影的活跃会话**会在下一次请求前报
+  `session message projection "…" was removed or replaced`（核心是 fail-closed：缓存的消息不能
+  在没有解释器的情况下继续沿用，否则模型会突然看到未改写/未删除的原文）。
+  这不是日志损坏：**重启一次即可恢复**，冷重放会把 `plugin:` 记录当作不可解释事件跳过，
+  会话正常打开，但改写/删除的效果随之消失（原文回来）。要长期保留效果，就别卸插件，
+  或者用后续的 projection-only companion 包。
 - token meter 按原文计费，不统计投影后的文本；压缩摘要按投影后的文本。
 
 ## License
