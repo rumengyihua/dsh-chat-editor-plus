@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64" role="img" aria-label="Message editor">
-  <g fill="none" stroke="#BCBDC0" stroke-width="1.65" stroke-linejoin="round" stroke-linecap="round">
+  <g fill="none" stroke="#BCBDC0" stroke-width="1.65" stroke-linejoin="round" stroke-linecap="round" transform="translate(0.45 -0.45)">
     <path d="M3.5 20.5 4.3 16.3 16.2 4.4 19.6 7.8 7.7 19.7Z"/>
     <path d="M13.8 6.8 17.2 10.2"/>
   </g>
