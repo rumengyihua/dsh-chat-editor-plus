@@ -1,7 +1,7 @@
 {
   "name": "dsh-chat-editor-plus",
-  "version": "0.2.26",
-  "description": "Edit, delete or fold any message of a DeepSeek Harness conversation — the user's own and the assistant's. User edits, assistant edits, tool-result edits and deletions rewrite what the model sees through the core's message projection (no placeholder, no correction prefix, thinking kept for assistant replies, and editable in the panel); plus display-only folds and fork. Desktop-adapted fork of dsh-chat-editor from DSH-CyberWorkStation.",
+  "version": "0.2.27",
+  "description": "Rewrite or delete what the model remembers: the text, reasoning blocks or tool results of any message the model reads, plus one-click clearing of a whole turn, while the message keeps its place and seq on the session surface. Reversible — disable the plugin and the original conversation is back. Branch from any turn. Desktop build of dsh-chat-editor.",
   "type": "module",
   "main": "lib/index.js",
   "icon": "icon.svg",
